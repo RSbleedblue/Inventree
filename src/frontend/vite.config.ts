@@ -74,12 +74,12 @@ export default defineConfig(({ command, mode }) => {
     server: {
       proxy: {
         '/media': {
-          target: 'http://localhost:8000',
+          target: 'http://localhost',
           changeOrigin: true,
           secure: true
         },
         '/static': {
-          target: 'http://localhost:8000',
+          target: 'http://localhost',
           changeOrigin: true,
           secure: true
         }

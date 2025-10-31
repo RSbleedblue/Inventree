@@ -103,6 +103,8 @@ export async function doBasicLogin(
         setAuthenticated(true);
         loginDone = true;
         success = true;
+        // Use login response directly, skip session check
+        return; // Skip the session check after login
       }
     })
     .catch(async (err) => {
@@ -282,9 +284,14 @@ function observeProfile() {
 
 export async function ensureCsrf() {
   const cookie = getCsrfCookie();
-  if (cookie == undefined) {
+  // Skip session API call if already authenticated - CSRF token should already be available after login
+  const { is_authed } = useUserState.getState();
+  // Only call session API to get CSRF if cookie is missing AND not authenticated
+  // This prevents calling session API after successful login
+  if (cookie == undefined && !is_authed) {
     await api.get(apiUrl(ApiEndpoints.auth_session)).catch(() => {});
   }
+  // If authenticated, we should already have CSRF token from login response
 }
 
 export function handleReset(

@@ -1,0 +1,98 @@
+version: '3.8'
+
+services:
+  db:
+    image: postgres:17
+    container_name: inventree-db
+    environment:
+      - POSTGRES_USER=${INVENTREE_DB_USER:-inventree}
+      - POSTGRES_PASSWORD=${INVENTREE_DB_PASSWORD}
+      - POSTGRES_DB=${INVENTREE_DB_NAME:-inventree}
+    volumes:
+      - inventree-db-data:/var/lib/postgresql/data
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${INVENTREE_DB_USER:-inventree}"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  redis:
+    image: redis:7-alpine
+    container_name: inventree-redis
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  backend:
+    build:
+      context: .
+      dockerfile: Dockerfile
+      target: production
+    container_name: inventree-backend
+    depends_on:
+      db:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    environment:
+      - INVENTREE_DB_ENGINE=postgresql
+      - INVENTREE_DB_NAME=${INVENTREE_DB_NAME:-inventree}
+      - INVENTREE_DB_USER=${INVENTREE_DB_USER:-inventree}
+      - INVENTREE_DB_PASSWORD=${INVENTREE_DB_PASSWORD}
+      - INVENTREE_DB_HOST=db
+      - INVENTREE_DB_PORT=5432
+      - INVENTREE_CACHE_HOST=redis
+      - INVENTREE_CACHE_PORT=6379
+      - INVENTREE_SITE_URL=${INVENTREE_SITE_URL:-http://localhost:8000}
+      - INVENTREE_TRUSTED_ORIGINS=${INVENTREE_TRUSTED_ORIGINS:-http://localhost:5173,http://localhost:8000}
+      - INVENTREE_SECRET_KEY_FILE=/home/inventree/data/secret_key.txt
+      - INVENTREE_CONFIG_FILE=/home/inventree/data/config.yaml
+      - INVENTREE_STATIC_ROOT=/home/inventree/data/static
+      - INVENTREE_MEDIA_ROOT=/home/inventree/data/media
+      - INVENTREE_BACKUP_DIR=/home/inventree/data/backup
+      - INVENTREE_PLUGIN_DIR=/home/inventree/data/plugins
+      - INVENTREE_AUTO_UPDATE=True
+      - INVENTREE_DEBUG=False
+    volumes:
+      - inventree-data:/home/inventree/data
+    ports:
+      - "8000:8000"
+    restart: unless-stopped
+
+  worker:
+    build:
+      context: .
+      dockerfile: Dockerfile
+      target: production
+    container_name: inventree-worker
+    command: ["invoke", "worker"]
+    depends_on:
+      - backend
+      - db
+      - redis
+    environment:
+      - INVENTREE_DB_ENGINE=postgresql
+      - INVENTREE_DB_NAME=${INVENTREE_DB_NAME:-inventree}
+      - INVENTREE_DB_USER=${INVENTREE_DB_USER:-inventree}
+      - INVENTREE_DB_PASSWORD=${INVENTREE_DB_PASSWORD}
+      - INVENTREE_DB_HOST=db
+      - INVENTREE_DB_PORT=5432
+      - INVENTREE_CACHE_HOST=redis
+      - INVENTREE_CACHE_PORT=6379
+      - INVENTREE_SECRET_KEY_FILE=/home/inventree/data/secret_key.txt
+      - INVENTREE_CONFIG_FILE=/home/inventree/data/config.yaml
+      - INVENTREE_STATIC_ROOT=/home/inventree/data/static
+      - INVENTREE_MEDIA_ROOT=/home/inventree/data/media
+      - INVENTREE_DEBUG=False
+    volumes:
+      - inventree-data:/home/inventree/data
+    restart: unless-stopped
+
+volumes:
+  inventree-db-data:
+  inventree-data:
+

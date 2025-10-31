@@ -39,7 +39,14 @@ export const useUserState = create<UserStateProps>((set, get) => ({
     setApiDefaults();
   },
   fetchUserToken: async () => {
-    // If neither the csrf or session cookies are available, we cannot fetch a token
+    // DO NOT call session API if already authenticated from login
+    // Trust the login response directly
+    if (get().is_authed) {
+      return; // Skip session API entirely
+    }
+    
+    // Only check session if not already authenticated (e.g., page refresh)
+    // But only check cookies first, don't call API unnecessarily
     if (
       !document.cookie.includes('csrftoken') &&
       !document.cookie.includes('sessionid')
@@ -48,6 +55,8 @@ export const useUserState = create<UserStateProps>((set, get) => ({
       return;
     }
 
+    // Only call session API for existing sessions (not after fresh login)
+    // This is only for checking if user has existing session on page load
     await api
       .get(apiUrl(ApiEndpoints.auth_session))
       .then((response) => {
@@ -62,14 +71,21 @@ export const useUserState = create<UserStateProps>((set, get) => ({
       });
   },
   fetchUserState: async () => {
-    if (!get().isAuthed()) {
+    // If already authenticated from login response, NEVER call session API
+    // Just fetch user data directly - trust the login response
+    if (get().is_authed) {
+      // Skip ALL session checks - proceed directly to fetch user data
+      // DO NOT call fetchUserToken() which would call session API
+    } else {
+      // Only check session if NOT authenticated (e.g., page refresh check)
+      // This is for checking existing sessions on app load, not after login
       await get().fetchUserToken();
-    }
-
-    // If we still don't have a token, clear the user state and return
-    if (!get().isAuthed()) {
-      get().clearUserState();
-      return;
+      
+      // If we still don't have a token after checking session, clear the user state and return
+      if (!get().is_authed) {
+        get().clearUserState();
+        return;
+      }
     }
 
     // Fetch user data
