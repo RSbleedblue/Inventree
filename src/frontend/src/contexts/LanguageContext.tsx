@@ -157,7 +157,25 @@ export function LanguageContext({
 }
 
 export async function activateLocale(locale: string) {
-  const { messages } = await import(`../locales/${locale}/messages.ts`);
-  i18n.load(locale, messages);
+  // Eagerly import any compiled catalogs so Vite can include them in the bundle
+  const catalogs = import.meta.glob('../locales/*/messages.{ts,js}', {
+    eager: true
+  }) as Record<string, { messages?: Record<string, string> }>;
+
+  const tsPath = `../locales/${locale}/messages.ts`;
+  const jsPath = `../locales/${locale}/messages.js`;
+  const mod = catalogs[tsPath] ?? catalogs[jsPath];
+
+  if (!mod || !mod.messages) {
+    // Fall back to empty catalog to avoid runtime crash if catalogs are not compiled yet
+    console.warn(
+      `i18n: catalog for locale "${locale}" not found. Run \`npm run compile\` to generate catalogs.`
+    );
+    i18n.load(locale, {});
+    i18n.activate(locale);
+    return;
+  }
+
+  i18n.load(locale, mod.messages);
   i18n.activate(locale);
 }
