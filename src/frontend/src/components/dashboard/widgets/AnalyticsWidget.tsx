@@ -1,5 +1,5 @@
 import { t } from '@lingui/core/macro';
-import { ActionIcon, Group, Loader, Stack, Text, Title } from '@mantine/core';
+import { ActionIcon, getThemeColor, Group, Loader, Stack, Text, Title, useMantineTheme } from '@mantine/core';
 import { IconExclamationCircle } from '@tabler/icons-react';
 import { useQuery } from '@tanstack/react-query';
 import { useMemo } from 'react';
@@ -33,6 +33,8 @@ export default function AnalyticsWidget({
   const user = useUserState();
   const navigate = useNavigate();
   const visibility = useDocumentVisibility();
+  const theme = useMantineTheme();
+  const primaryColor = getThemeColor(theme.primaryColor, theme);
 
   const queries = items.map((item) => {
     const modelProperties = ModelInformationDict[item.modelType];
@@ -61,7 +63,7 @@ export default function AnalyticsWidget({
 
   return (
     <Stack gap="xs" style={{ height: '100%' }}>
-      <Title order={4}>{title}</Title>
+      <Title order={4} style={{ color: primaryColor }}>{title}</Title>
       {items.map((item, index) => {
         const query = queries[index];
         const modelProperties = ModelInformationDict[item.modelType];
@@ -94,9 +96,7 @@ export default function AnalyticsWidget({
             onClick={onFollowLink}
           >
             <Group gap="xs">
-              <InvenTreeIcon
-                icon={item.icon ?? modelProperties.icon}
-              />
+              
               <Text size="sm">{item.label}</Text>
             </Group>
             <Group gap="xs">

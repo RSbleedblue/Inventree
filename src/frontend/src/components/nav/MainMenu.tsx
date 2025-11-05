@@ -92,12 +92,12 @@ export function MainMenu() {
           >
             <Trans>Change Color Mode</Trans>
           </Menu.Item>
-          <Menu.Item
+          {/* <Menu.Item
             onClick={() => aboutInvenTree()}
             leftSection={<IconInfoCircle />}
           >
             <Trans>About InvenTree</Trans>
-          </Menu.Item>
+          </Menu.Item> */}
           <Menu.Divider />
           <Menu.Item
             leftSection={<IconLogout />}

@@ -1,5 +1,5 @@
 import { t } from '@lingui/core/macro';
-import { Center, Stack, Text, Title } from '@mantine/core';
+import { Center, getThemeColor, Stack, Text, Title, useMantineTheme } from '@mantine/core';
 import { useQuery } from '@tanstack/react-query';
 import { useMemo } from 'react';
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, BarChart, Bar } from 'recharts';
@@ -27,6 +27,8 @@ export default function ChartWidget({
   const api = useApi();
   const user = useUserState();
   const visibility = useDocumentVisibility();
+  const theme = useMantineTheme();
+  const primaryColor = getThemeColor(theme.primaryColor, theme);
 
   const modelProperties = ModelInformationDict[modelType];
 
@@ -71,7 +73,7 @@ export default function ChartWidget({
 
   return (
     <Stack gap="xs" style={{ height: '100%' }}>
-      <Title order={4}>{title}</Title>
+      <Title order={4} style={{ color: primaryColor }}>{title}</Title>
       {query.isFetching ? (
         <Center style={{ height: '100%' }}>
           <Text size="sm" c="dimmed">Loading...</Text>
@@ -85,24 +87,23 @@ export default function ChartWidget({
           <ResponsiveContainer width="100%" height="100%">
             {chartType === 'line' ? (
               <LineChart data={chartData}>
-                <CartesianGrid strokeDasharray="3 3" />
                 <XAxis dataKey="name" />
                 <YAxis />
                 <Tooltip />
+                
                 <Line
                   type="monotone"
                   dataKey="value"
-                  stroke="#8884d8"
+                  stroke={primaryColor}
                   strokeWidth={2}
                 />
               </LineChart>
             ) : (
               <BarChart data={chartData}>
-                <CartesianGrid strokeDasharray="3 3" />
                 <XAxis dataKey="name" />
                 <YAxis />
                 <Tooltip />
-                <Bar dataKey="value" fill="#8884d8" />
+                <Bar dataKey="value" fill={primaryColor} />
               </BarChart>
             )}
           </ResponsiveContainer>
