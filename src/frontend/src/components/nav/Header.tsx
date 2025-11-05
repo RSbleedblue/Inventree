@@ -156,7 +156,7 @@ export function Header() {
       <Container className={classes.layoutHeaderSection} size='100%'>
         <Group justify='space-between'>
           <Group>
-            <NavHoverMenu openDrawer={openNavDrawer} />
+            {!navigationOpen && <NavHoverMenu openDrawer={openNavDrawer} />}
             {/* <NavTabs /> */}
             {/* <NavigationDrawer opened={navDrawerOpened} close={closeNavDrawer} /> */}
           </Group>
