@@ -88,10 +88,10 @@ export function useDashboardItems(): DashboardLibraryProps {
   }, [pluginQuery.data, inventreeContext]);
 
   const items: DashboardWidgetProps[] = useMemo(() => {
-    const widgets = [...builtin, ...pluginDashboardItems];
+    const widgets = [...pluginDashboardItems];
 
     return widgets.filter((item) => item.enabled ?? true);
-  }, [builtin, pluginDashboardItems]);
+  }, [ pluginDashboardItems]);
 
   const loaded: boolean = useMemo(() => {
     if (pluginsEnabled) {

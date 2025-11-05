@@ -1,0 +1,1 @@
+export const INVEX_INSTANCE_NAME = 'Invex';

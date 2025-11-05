@@ -20,6 +20,7 @@ import { useMemo } from 'react';
 import useInstanceName from '../../hooks/UseInstanceName';
 import { useUserState } from '../../states/UserState';
 import { StylishText } from '../items/StylishText';
+import { INVEX_INSTANCE_NAME } from '../../constants/constants';
 
 /**
  * A menu for editing the dashboard layout
@@ -48,7 +49,7 @@ export default function DashboardMenu({
     const username = user.username();
 
     return (
-      <StylishText size='lg'>{`${instanceName} - ${username}`}</StylishText>
+      <StylishText size='lg'>{`${INVEX_INSTANCE_NAME} - ${username}`}</StylishText>
     );
   }, [user, instanceName]);
 

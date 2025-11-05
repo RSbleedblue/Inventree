@@ -178,7 +178,7 @@ function DrawerContent({ closeFunc }: Readonly<{ closeFunc?: () => void }>) {
   return (
     <Flex direction='column' mih='100vh' p={16}>
       <Group wrap='nowrap'>
-        <InvenTreeLogo />
+        <InvenTreeLogo height={28} width={28} />
         <StylishText size='xl'>{title}</StylishText>
       </Group>
       <Space h='xs' />

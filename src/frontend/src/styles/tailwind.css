@@ -1,0 +1,9 @@
+@import "tailwindcss";
+
+/* Optional: Add custom Tailwind utilities here */
+/* @layer utilities {
+  .custom-utility {
+    @apply ...;
+  }
+} */
+

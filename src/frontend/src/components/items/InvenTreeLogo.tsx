@@ -2,37 +2,31 @@ import { t } from '@lingui/core/macro';
 import { ActionIcon, useMantineColorScheme } from '@mantine/core';
 import { forwardRef } from 'react';
 import { NavLink } from 'react-router-dom';
+import synthlaneLogoUrl from '../../../public/synthlaneLOGO.svg';
 
-import synthlaneLogoSvg from '../../../public/synthlaneLOGO.svg';
-
-export const InvenTreeLogoHomeButton = forwardRef<HTMLDivElement>(
-  (props, ref) => {
-    return (
-      <div ref={ref} {...props}>
-        <NavLink to={'/'}>
-          <ActionIcon size={28} variant='transparent'>
-            <InvenTreeLogo />
-          </ActionIcon>
-        </NavLink>
-      </div>
-    );
-  }
-);
-
-export const InvenTreeLogo = () => {
+export const InvenTreeLogo = ({height = 18, width = 18}: {height: number, width: number}) => {
   const { colorScheme } = useMantineColorScheme();
 
   return (
     <img
-      src={synthlaneLogoSvg}
+      src={synthlaneLogoUrl}
       alt={t`InvenTree Logo`}
-      height={28}
+      height={height}
+      width={width}
       style={{
-        // SVG has white fill (#FFFFFF)
-        // For dark theme: keep white (brightness(0) invert(1) = white)
-        // For light theme: make black (brightness(0) = black)
-        filter: colorScheme === 'dark' ? 'brightness(2) invert(1)' : 'brightness(0)',
+        filter: colorScheme === 'light' ? 'invert(1)' : 'none',
+        transition: 'filter 0.2s ease-in-out',
       }}
     />
   );
 };
+
+export const InvenTreeLogoHomeButton = forwardRef<HTMLDivElement>((props, ref) => (
+  <div ref={ref} {...props}>
+    <NavLink to='/'>
+      <ActionIcon size={28} variant='transparent'>
+        <InvenTreeLogo height={28} width={28} />
+      </ActionIcon>
+    </NavLink>
+  </div>
+));

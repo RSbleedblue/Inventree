@@ -6,7 +6,6 @@ import { vars } from './theme';
 export const layoutHeader = style({
   paddingTop: vars.spacing.sm,
   marginBottom: 10,
-
   [vars.lightSelector]: {
     backgroundColor: vars.colors.gray[0],
     borderBottom: `${rem(1)} solid ${vars.colors.gray[2]}`

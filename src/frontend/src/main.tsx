@@ -12,8 +12,9 @@ import 'react-resizable/css/styles.css';
 import * as MantineCore from '@mantine/core';
 import * as MantineNotifications from '@mantine/notifications';
 import * as React from 'react';
-import * as ReactDOM from 'react-dom';
+import * as ReactDOM from 'react-dom/client';
 import * as ReactDOMClient from 'react-dom/client';
+import './styles/tailwind.css';
 import './styles/overrides.css';
 
 // Lingui imports (required for plugin translation)

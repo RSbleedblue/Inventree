@@ -210,8 +210,8 @@ export function BuiltinSettingsWidgets(): DashboardWidgetProps[] {
  */
 export default function DashboardWidgetLibrary(): DashboardWidgetProps[] {
   return [
-    ...BuiltinQueryCountWidgets(),
-    ...BuiltinGettingStartedWidgets(),
-    ...BuiltinSettingsWidgets()
+    // ...BuiltinQueryCountWidgets(),
+    // ...BuiltinGettingStartedWidgets(),
+    // ...BuiltinSettingsWidgets()
   ];
 }
