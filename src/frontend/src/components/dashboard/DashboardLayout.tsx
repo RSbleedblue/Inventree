@@ -202,10 +202,15 @@ export default function DashboardLayout() {
   const getDefaultWidgetLabels = useCallback((items: DashboardWidgetProps[]): string[] => {
     const labels: string[] = [];
     
+    // Prioritize filtered-orders-chart (interactive chart with filters)
+    if (items.find((w) => w.label === 'filtered-orders-chart')) labels.push('filtered-orders-chart');
+    
+    // Also include simple orders-chart
+    if (items.find((w) => w.label === 'orders-chart')) labels.push('orders-chart');
+    
     // Prioritize analytics widgets
     if (items.find((w) => w.label === 'stock-analytics')) labels.push('stock-analytics');
     if (items.find((w) => w.label === 'orders-analytics')) labels.push('orders-analytics');
-    if (items.find((w) => w.label === 'parts-chart')) labels.push('parts-chart');
     
     // Add some key statistics
     if (items.find((w) => w.label === 'low-stk')) labels.push('low-stk');

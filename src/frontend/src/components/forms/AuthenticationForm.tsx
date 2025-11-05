@@ -68,14 +68,13 @@ export function AuthenticationForm() {
         .then((success) => {
           setIsLoggingIn(false);
 
-          if (isLoggedIn()) {
+          if (success) {
+            // Login was successful - doBasicLogin already fetched user state
             showLoginNotification({
               title: t`Login successful`,
               message: t`Logged in successfully`
             });
             followRedirect(navigate, location?.state);
-          } else if (success) {
-            // MFA login
           } else {
             showLoginNotification({
               title: t`Login failed`,

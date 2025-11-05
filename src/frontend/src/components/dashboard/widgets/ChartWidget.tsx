@@ -5,7 +5,7 @@ import { useMemo } from 'react';
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, BarChart, Bar } from 'recharts';
 
 import { ModelInformationDict } from '@lib/enums/ModelInformation';
-import type { ModelType } from '@lib/enums/ModelType';
+import { ModelType } from '@lib/enums/ModelType';
 import { apiUrl } from '@lib/functions/Api';
 import { useDocumentVisibility } from '@mantine/hooks';
 import { useApi } from '../../../contexts/ApiContext';
@@ -42,34 +42,83 @@ export default function ChartWidget({
         return null;
       }
 
+      // For order types, get more results to aggregate by day
+      const limit = (modelType === ModelType.salesorder || 
+                     modelType === ModelType.purchaseorder || 
+                     modelType === ModelType.build) ? 1000 : 100;
+      
+      const orderParams: any = {
+        ...params,
+        limit
+      };
+      
+      // Add ordering for order types
+      if (limit === 1000) {
+        orderParams.ordering = '-creation_date';
+      }
+      
       return api
         .get(apiUrl(modelProperties.api_endpoint), {
-          params: {
-            ...params,
-            limit: 100
-          }
+          params: orderParams
         })
         .then((res) => res.data);
     }
   });
 
-  // Generate sample data if no data is available
+  // Generate chart data - aggregate orders by day
   const chartData = useMemo(() => {
     const results = query.data?.results ?? [];
     
-    if (results.length === 0) {
-      // Return empty chart data with sample structure
-      const days = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'];
-      return days.map((day) => ({ name: day, value: 0 }));
-    }
+    // Check if this is an order type (salesorder, purchaseorder, or build)
+    const isOrderType = modelType === ModelType.salesorder || 
+                       modelType === ModelType.purchaseorder || 
+                       modelType === ModelType.build;
+    
+    if (isOrderType) {
+      // Aggregate orders by day for the last 7 days
+      const ordersByDay: Record<string, number> = {};
+      const today = new Date();
+      const days = [];
+      
+      // Get last 7 days
+      for (let i = 6; i >= 0; i--) {
+        const date = new Date(today);
+        date.setDate(date.getDate() - i);
+        const dayKey = date.toISOString().split('T')[0]; // YYYY-MM-DD
+        const dayName = date.toLocaleDateString('en-US', { weekday: 'short' });
+        days.push({ dayKey, dayName });
+        ordersByDay[dayKey] = 0;
+      }
+      
+      // Count orders per day
+      results.forEach((order: any) => {
+        if (order.creation_date) {
+          const orderDate = new Date(order.creation_date);
+          const orderDayKey = orderDate.toISOString().split('T')[0];
+          if (ordersByDay.hasOwnProperty(orderDayKey)) {
+            ordersByDay[orderDayKey]++;
+          }
+        }
+      });
+      
+      // Convert to chart data format
+      return days.map(({ dayKey, dayName }) => ({
+        name: dayName,
+        value: ordersByDay[dayKey] || 0
+      }));
+    } else {
+      // For non-order types, use original logic
+      if (results.length === 0) {
+        const days = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'];
+        return days.map((day) => ({ name: day, value: 0 }));
+      }
 
-    // Process real data - this is a simple example
-    // You might want to aggregate by date or other fields
-    return results.slice(0, 7).map((item: any, index: number) => ({
-      name: `Item ${index + 1}`,
-      value: 1
-    }));
-  }, [query.data]);
+      return results.slice(0, 7).map((item: any, index: number) => ({
+        name: `Item ${index + 1}`,
+        value: 1
+      }));
+    }
+  }, [query.data, modelType]);
 
   return (
     <Stack gap="xs" style={{ height: '100%' }}>

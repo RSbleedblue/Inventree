@@ -97,58 +97,101 @@ export async function doBasicLogin(
         baseURL: host
       }
     )
-    .then((response) => {
+    .then(async (response) => {
       setAuthContext(response.data?.data);
       if (response.status == 200 && response.data?.meta?.is_authenticated) {
         setAuthenticated(true);
         loginDone = true;
         success = true;
-        // Use login response directly, skip session check
+        // Fetch user state immediately before returning to ensure state is updated
+        await fetchUserState();
+        await fetchGlobalStates(navigate);
+        observeProfile();
         return; // Skip the session check after login
       }
     })
     .catch(async (err) => {
       notifications.hide('auth-login-error');
 
-      if (err?.response?.status) {
-        switch (err.response.status) {
-          case 401:
-            await handlePossibleMFAError(err);
-            break;
-          case 409:
-            notifications.show({
-              title: t`Already logged in`,
-              message: t`There is a conflicting session on the server for this browser. Please logout of that first.`,
-              color: 'red',
-              id: 'auth-login-error',
-              autoClose: false
-            });
-            break;
-          default:
-            notifications.show({
-              title: `${t`Login failed`} (${err.response.status})`,
-              message: t`Check your input and try again.`,
-              id: 'auth-login-error',
-              color: 'red'
-            });
-            break;
+      // First, check if this is a 409 conflict (session conflict) that we should retry
+      // This handles both cases where status is 409 or where it might be in the error data
+      const is409Conflict = err?.response?.status === 409 || 
+                            err?.response?.data?.meta?.error === 'conflict' ||
+                            (err?.response?.data && typeof err.response.data === 'string' && err.response.data.includes('409'));
+      
+      if (is409Conflict) {
+        // There's a conflicting session - automatically logout and retry login
+        // Don't show error yet - wait to see if retry succeeds
+        try {
+          // Logout from the existing session
+          await authApi(apiUrl(ApiEndpoints.auth_session), undefined, 'delete').catch(() => {});
+          clearUserState();
+          clearCsrfCookie();
+          
+          // Ensure we have a fresh CSRF token before retrying
+          await ensureCsrf();
+          
+          // Retry the login after clearing the session
+          const retryResponse = await api.post(
+            apiUrl(ApiEndpoints.auth_login),
+            {
+              username: username,
+              password: password
+            },
+            {
+              baseURL: host
+            }
+          );
+          
+          setAuthContext(retryResponse.data?.data);
+          if (retryResponse.status == 200 && retryResponse.data?.meta?.is_authenticated) {
+            setAuthenticated(true);
+            loginDone = true;
+            success = true;
+            await fetchUserState();
+            await fetchGlobalStates(navigate);
+            observeProfile();
+            // Retry succeeded - don't show any error, return early
+            return;
+          } else {
+            // Retry failed - show error below
+          }
+        } catch (retryErr: any) {
+          // Retry failed - will show error below
         }
-      } else {
-        notifications.show({
-          title: t`Login failed`,
-          message: t`No response from server.`,
-          color: 'red',
-          id: 'login-error'
-        });
+      }
+
+      // Only show errors if we've exhausted all retry attempts and login definitely failed
+      if (!success) {
+        if (err?.response?.status) {
+          switch (err.response.status) {
+            case 401:
+              await handlePossibleMFAError(err);
+              break;
+            default:
+              notifications.show({
+                title: `${t`Login failed`} (${err.response.status})`,
+                message: t`Check your input and try again.`,
+                id: 'auth-login-error',
+                color: 'red'
+              });
+              break;
+          }
+        } else {
+          // Network error or no response
+          notifications.show({
+            title: t`Login failed`,
+            message: t`No response from server.`,
+            color: 'red',
+            id: 'login-error'
+          });
+        }
       }
     });
 
-  if (loginDone) {
-    await fetchUserState();
-    // see if mfa registration is required
-    await fetchGlobalStates(navigate);
-    observeProfile();
-  } else if (!success) {
+  // If login was successful, state is already fetched above
+  // If login failed, clear user state
+  if (!success) {
     clearUserState();
   }
   return success;

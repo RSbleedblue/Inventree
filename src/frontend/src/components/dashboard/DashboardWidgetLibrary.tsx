@@ -11,6 +11,7 @@ import NewsWidget from './widgets/NewsWidget';
 import QueryCountDashboardWidget from './widgets/QueryCountDashboardWidget';
 import AnalyticsWidget from './widgets/AnalyticsWidget';
 import ChartWidget from './widgets/ChartWidget';
+import FilteredChartWidget from './widgets/FilteredChartWidget';
 
 /**
  *
@@ -301,22 +302,63 @@ export function BuiltinAnalyticsWidgets(): DashboardWidgetProps[] {
     }
   }
 
-  // Parts Chart Widget
-  if (user.hasViewPermission(ModelType.part)) {
+  // Orders Chart Widget - Day-wise orders (shown by default)
+  const orderChartTypes: ModelType[] = [];
+  if (user.hasViewPermission(ModelType.salesorder)) {
+    orderChartTypes.push(ModelType.salesorder);
+  }
+  if (user.hasViewPermission(ModelType.purchaseorder)) {
+    orderChartTypes.push(ModelType.purchaseorder);
+  }
+  if (user.hasViewPermission(ModelType.build)) {
+    orderChartTypes.push(ModelType.build);
+  }
+
+  // Show orders chart with the first available order type
+  if (orderChartTypes.length > 0) {
+    // Use sales order if available, otherwise purchase order, otherwise build
+    const primaryOrderType = orderChartTypes.find(t => t === ModelType.salesorder) || 
+                             orderChartTypes.find(t => t === ModelType.purchaseorder) || 
+                             orderChartTypes[0];
+    
     widgets.push({
-      label: 'parts-chart',
-      title: t`Parts Activity`,
-      description: t`Chart showing parts activity`,
+      label: 'orders-chart',
+      title: t`Orders Day-wise`,
+      description: t`Chart showing orders created per day`,
       minWidth: 6,
       minHeight: 4,
-      modelType: ModelType.part,
+      modelType: primaryOrderType,
       render: () => (
         <ChartWidget
-          title={t`Parts Activity`}
-          modelType={ModelType.part}
-          params={{ active: true }}
+          title={t`Orders Day-wise`}
+          modelType={primaryOrderType}
           chartType="line"
         />
+      )
+    });
+  }
+
+  // Filtered Chart Widget - with filters for date range, order type, and chart type
+  const filteredChartOrderTypes: ModelType[] = [];
+  if (user.hasViewPermission(ModelType.salesorder)) {
+    filteredChartOrderTypes.push(ModelType.salesorder);
+  }
+  if (user.hasViewPermission(ModelType.purchaseorder)) {
+    filteredChartOrderTypes.push(ModelType.purchaseorder);
+  }
+  if (user.hasViewPermission(ModelType.build)) {
+    filteredChartOrderTypes.push(ModelType.build);
+  }
+
+  if (filteredChartOrderTypes.length > 0) {
+    widgets.push({
+      label: 'filtered-orders-chart',
+      title: t`Orders Chart (Filtered)`,
+      description: t`Interactive chart with filters for date range, order type, and chart type`,
+      minWidth: 8,
+      minHeight: 5,
+      render: () => (
+        <FilteredChartWidget title={t`Orders Chart`} />
       )
     });
   }
