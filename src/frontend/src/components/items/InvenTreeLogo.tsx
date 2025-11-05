@@ -4,7 +4,7 @@ import { forwardRef } from 'react';
 import { NavLink } from 'react-router-dom';
 import synthlaneLogoUrl from '../../../public/synthlaneLOGO.svg';
 
-export const InvenTreeLogo = ({height = 18, width = 18}: {height: number, width: number}) => {
+export const InvexLogo = ({height = 18, width = 18}: {height: number, width: number}) => {
   const { colorScheme } = useMantineColorScheme();
 
   return (
@@ -21,11 +21,11 @@ export const InvenTreeLogo = ({height = 18, width = 18}: {height: number, width:
   );
 };
 
-export const InvenTreeLogoHomeButton = forwardRef<HTMLDivElement>((props, ref) => (
+export const InvexLogoHomeButton = forwardRef<HTMLDivElement>((props, ref) => (
   <div ref={ref} {...props}>
     <NavLink to='/'>
       <ActionIcon size={28} variant='transparent'>
-        <InvenTreeLogo height={28} width={28} />
+        <InvexLogo height={28} width={28} />
       </ActionIcon>
     </NavLink>
   </div>

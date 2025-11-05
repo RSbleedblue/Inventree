@@ -12,6 +12,7 @@ import { ServerInfoModal } from '../components/modals/ServerInfoModal';
 import { useLocalState } from '../states/LocalState';
 import { LanguageContext } from './LanguageContext';
 import { colorSchema } from './colorSchema';
+import { MuiThemeWrapper } from './MuiThemeWrapper';
 
 import type { JSX } from 'react';
 
@@ -37,25 +38,27 @@ export function ThemeContext({
 
   return (
     <MantineProvider theme={myTheme} colorSchemeManager={colorSchema}>
-      <ContextMenuProvider>
-        <LanguageContext>
-          <ModalsProvider
-            labels={{
-              confirm: <Trans id={msg`Submit`.id} />,
-              cancel: <Trans id={msg`Cancel`.id} />
-            }}
-            modals={{
-              info: ServerInfoModal,
-              about: AboutInvenTreeModal,
-              license: LicenseModal,
-              qr: QrModal
-            }}
-          >
-            <Notifications />
-            {children}
-          </ModalsProvider>
-        </LanguageContext>
-      </ContextMenuProvider>
+      <MuiThemeWrapper>
+        <ContextMenuProvider>
+          <LanguageContext>
+            <ModalsProvider
+              labels={{
+                confirm: <Trans id={msg`Submit`.id} />,
+                cancel: <Trans id={msg`Cancel`.id} />
+              }}
+              modals={{
+                info: ServerInfoModal,
+                about: AboutInvenTreeModal,
+                license: LicenseModal,
+                qr: QrModal
+              }}
+            >
+              <Notifications />
+              {children}
+            </ModalsProvider>
+          </LanguageContext>
+        </ContextMenuProvider>
+      </MuiThemeWrapper>
     </MantineProvider>
   );
 }

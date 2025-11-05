@@ -137,7 +137,7 @@ export function Header() {
         zIndex: 10,
         top: 0
       };
-    } else {
+  } else {
       return {};
     }
   }, [userSettings]);
@@ -157,7 +157,8 @@ export function Header() {
         <Group justify='space-between'>
           <Group>
             <NavHoverMenu openDrawer={openNavDrawer} />
-            <NavTabs />
+            {/* <NavTabs /> */}
+            {/* <NavigationDrawer opened={navDrawerOpened} close={closeNavDrawer} /> */}
           </Group>
           {navbar_message && (
             <Text>

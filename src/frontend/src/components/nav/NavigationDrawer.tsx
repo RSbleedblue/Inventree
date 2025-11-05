@@ -1,28 +1,79 @@
 import { t } from '@lingui/core/macro';
-import {
-  Container,
-  Drawer,
-  Flex,
-  Group,
-  ScrollArea,
-  Space
-} from '@mantine/core';
-import { useViewportSize } from '@mantine/hooks';
-import { useEffect, useMemo, useRef, useState } from 'react';
+import * as React from 'react';
+import { styled, useTheme, Theme, CSSObject } from '@mui/material/styles';
+import Box from '@mui/material/Box';
+import MuiDrawer from '@mui/material/Drawer';
+import List from '@mui/material/List';
+import Divider from '@mui/material/Divider';
+import IconButton from '@mui/material/IconButton';
+import ChevronLeftIcon from '@mui/icons-material/ChevronLeft';
+import ChevronRightIcon from '@mui/icons-material/ChevronRight';
+import ListItem from '@mui/material/ListItem';
+import ListItemButton from '@mui/material/ListItemButton';
+import ListItemIcon from '@mui/material/ListItemIcon';
+import ListItemText from '@mui/material/ListItemText';
+import { useMemo } from 'react';
+import { useNavigate } from 'react-router-dom';
+import { useShallow } from 'zustand/react/shallow';
 
 import { ModelType } from '@lib/enums/ModelType';
 import { UserRoles } from '@lib/enums/Roles';
-import { AboutLinks, DocumentationLinks } from '../../defaults/links';
-import useInstanceName from '../../hooks/UseInstanceName';
-import * as classes from '../../main.css';
+import { navigateToLink } from '@lib/functions/Navigation';
+import { InvenTreeIcon } from '../../functions/icons';
 import { useGlobalSettingsState } from '../../states/SettingsStates';
 import { useUserState } from '../../states/UserState';
-import { InvenTreeLogo } from '../items/InvenTreeLogo';
-import { type MenuLinkItem, MenuLinks } from '../items/MenuLinks';
-import { StylishText } from '../items/StylishText';
+import { InvexLogo } from '../items/InvenTreeLogo';
+import { type MenuLinkItem } from '../items/MenuLinks';
+import { INVEX_INSTANCE_NAME } from '../../constants/constants';
+import { useLocalState } from '../../states/LocalState';
 
-// TODO @matmair #1: implement plugin loading and menu item generation see #5269
-const plugins: MenuLinkItem[] = [];
+const drawerWidth = 280;
+
+const openedMixin = (theme: Theme): CSSObject => ({
+  width: drawerWidth,
+  transition: theme.transitions.create('width', {
+    easing: theme.transitions.easing.sharp,
+    duration: theme.transitions.duration.enteringScreen,
+  }),
+  overflowX: 'hidden',
+});
+
+const closedMixin = (theme: Theme): CSSObject => ({
+  transition: theme.transitions.create('width', {
+    easing: theme.transitions.easing.sharp,
+    duration: theme.transitions.duration.leavingScreen,
+  }),
+  overflowX: 'hidden',
+  width: `calc(${theme.spacing(7)} + 1px)`,
+  [theme.breakpoints.up('sm')]: {
+    width: `calc(${theme.spacing(8)} + 1px)`,
+  },
+});
+
+const DrawerHeader = styled('div')(({ theme }) => ({
+  display: 'flex',
+  alignItems: 'center',
+  justifyContent: 'space-between',
+  padding: theme.spacing(0, 1),
+  ...theme.mixins.toolbar,
+}));
+
+const Drawer = styled(MuiDrawer, { shouldForwardProp: (prop) => prop !== 'open' })<{
+  open?: boolean;
+}>(({ theme, open }) => ({
+  width: drawerWidth,
+  flexShrink: 0,
+  whiteSpace: 'nowrap',
+  boxSizing: 'border-box',
+  ...(open && {
+    ...openedMixin(theme),
+    '& .MuiDrawer-paper': openedMixin(theme),
+  }),
+  ...(!open && {
+    ...closedMixin(theme),
+    '& .MuiDrawer-paper': closedMixin(theme),
+  }),
+}));
 
 export function NavigationDrawer({
   opened,
@@ -31,37 +82,72 @@ export function NavigationDrawer({
   opened: boolean;
   close: () => void;
 }>) {
+  const theme = useTheme();
+  const [navigationOpen, setNavigationOpen] = useLocalState(
+    useShallow((state) => [state.navigationOpen, state.setNavigationOpen])
+  );
+  // Default to open (true) if navigationOpen is not set
+  const [open, setOpen] = React.useState(navigationOpen !== undefined ? navigationOpen : true);
+
+  React.useEffect(() => {
+    if (navigationOpen !== undefined) {
+      setOpen(navigationOpen);
+    }
+  }, [navigationOpen]);
+
+  // Initialize navigationOpen to true if it's undefined
+  React.useEffect(() => {
+    if (navigationOpen === undefined) {
+      setNavigationOpen(true);
+      setOpen(true);
+    }
+  }, [navigationOpen, setNavigationOpen]);
+
+  const handleDrawerOpen = () => {
+    setOpen(true);
+    setNavigationOpen(true);
+  };
+
+  const handleDrawerClose = () => {
+    setOpen(false);
+    setNavigationOpen(false);
+  };
+
   return (
-    <Drawer
-      opened={opened}
-      onClose={close}
-      size='lg'
-      withCloseButton={false}
-      classNames={{
-        body: classes.navigationDrawer
-      }}
-    >
-      <DrawerContent closeFunc={close} />
+    <Drawer variant="permanent" open={open}>
+      <DrawerHeader>
+        {open ? (
+          <div className='flex items-center gap-2 flex-1 justify-center'>
+            <InvexLogo height={18} width={18} />
+            <div className='font-bold text-lg'>
+              {INVEX_INSTANCE_NAME.toUpperCase()}
+            </div>
+          </div>
+        ) : null}
+        <IconButton onClick={open ? handleDrawerClose : handleDrawerOpen}>
+          {theme.direction === 'rtl' ? (
+            open ? <ChevronLeftIcon /> : <ChevronRightIcon />
+          ) : (
+            open ? <ChevronLeftIcon /> : <ChevronRightIcon />
+          )}
+        </IconButton>
+      </DrawerHeader>
+      <Divider />
+      <DrawerContent closeFunc={close} open={open} />
     </Drawer>
   );
 }
 
-function DrawerContent({ closeFunc }: Readonly<{ closeFunc?: () => void }>) {
+function DrawerContent({
+  closeFunc,
+  open
+}: Readonly<{
+  closeFunc?: () => void;
+  open: boolean;
+}>) {
   const user = useUserState();
-
   const globalSettings = useGlobalSettingsState();
-
-  const [scrollHeight, setScrollHeight] = useState(0);
-  const ref = useRef(null);
-  const { height } = useViewportSize();
-
-  const title = useInstanceName();
-
-  // update scroll height when viewport size changes
-  useEffect(() => {
-    if (ref.current == null) return;
-    setScrollHeight(height - ref.current['clientHeight'] - 65);
-  });
+  const navigate = useNavigate();
 
   // Construct menu items
   const menuItemsNavigate: MenuLinkItem[] = useMemo(() => {
@@ -88,7 +174,7 @@ function DrawerContent({ closeFunc }: Readonly<{ closeFunc?: () => void }>) {
       },
       {
         id: 'build',
-        title: t`Manufacturing`,
+        title: t`Orders`,
         link: '/manufacturing/',
         hidden: !user.hasViewRole(UserRoles.build),
         icon: 'build'
@@ -132,7 +218,7 @@ function DrawerContent({ closeFunc }: Readonly<{ closeFunc?: () => void }>) {
         hidden: !globalSettings.isSet('BARCODE_ENABLE')
       }
     ];
-  }, [user, globalSettings]);
+  }, [globalSettings]);
 
   const menuItemsSettings: MenuLinkItem[] = useMemo(() => {
     return [
@@ -165,66 +251,228 @@ function DrawerContent({ closeFunc }: Readonly<{ closeFunc?: () => void }>) {
     ];
   }, [user]);
 
-  const menuItemsDocumentation: MenuLinkItem[] = useMemo(
-    () => DocumentationLinks(),
-    []
-  );
+  const visibleNavItems = menuItemsNavigate.filter((item) => !item.hidden);
+  const visibleActionItems = menuItemsAction.filter((item) => !item.hidden);
+  const visibleSettingsItems = menuItemsSettings.filter((item) => !item.hidden);
 
-  const menuItemsAbout: MenuLinkItem[] = useMemo(
-    () => AboutLinks(globalSettings, user),
-    []
-  );
+  const handleItemClick = (item: MenuLinkItem) => {
+    if (item.link) {
+      closeFunc?.();
+      navigateToLink(item.link, navigate, null as any);
+    } else if (item.action) {
+      closeFunc?.();
+      item.action();
+    }
+  };
 
   return (
-    <Flex direction='column' mih='100vh' p={16}>
-      <Group wrap='nowrap'>
-        <InvenTreeLogo height={28} width={28} />
-        <StylishText size='xl'>{title}</StylishText>
-      </Group>
-      <Space h='xs' />
-      <Container className={classes.layoutContent} p={0}>
-        <ScrollArea h={scrollHeight} type='always' offsetScrollbars={false}>
-          <MenuLinks
-            title={t`Navigation`}
-            links={menuItemsNavigate}
-            beforeClick={closeFunc}
+    <Box sx={{ flexGrow: 1, overflow: 'auto' }}>
+      <List>
+        {visibleNavItems.map((item) => (
+          <ListItem key={item.id} disablePadding sx={{ display: 'block' }}>
+            <ListItemButton
+              onClick={() => handleItemClick(item)}
+              sx={[
+                {
+                  minHeight: 48,
+                  px: 2.5,
+                },
+                open
+                  ? {
+                      justifyContent: 'initial',
+                    }
+                  : {
+                      justifyContent: 'center',
+                    },
+              ]}
+            >
+              <ListItemIcon
+                sx={[
+                  {
+                    minWidth: 0,
+                    justifyContent: 'center',
+                  },
+                  open
+                    ? {
+                        mr: 3,
+                      }
+                    : {
+                        mr: 'auto',
+                      },
+                ]}
+              >
+                {item.icon && (
+                  <InvenTreeIcon icon={item.icon} iconProps={{ size: 20 }} />
+                )}
+              </ListItemIcon>
+              <ListItemText
+                primary={typeof item.title === 'string' ? item.title : item.title}
+                sx={[
+                  open
+                    ? {
+                        opacity: 1,
+                      }
+                    : {
+                        opacity: 0,
+                      },
+                ]}
+              />
+            </ListItemButton>
+          </ListItem>
+        ))}
+      </List>
+      <Divider />
+      <List>
+        <ListItem disablePadding>
+          <ListItemText
+            primary={t`Actions`}
+            sx={[
+              {
+                px: 2.5,
+                py: 1,
+                fontWeight: 600,
+                fontSize: '0.75rem',
+                textTransform: 'uppercase',
+              },
+              open
+                ? {
+                    opacity: 1,
+                  }
+                : {
+                    opacity: 0,
+                  },
+            ]}
           />
-          <MenuLinks
-            title={t`Settings`}
-            links={menuItemsSettings}
-            beforeClick={closeFunc}
+        </ListItem>
+        {visibleActionItems.map((item) => (
+          <ListItem key={item.id} disablePadding sx={{ display: 'block' }}>
+            <ListItemButton
+              onClick={() => handleItemClick(item)}
+              sx={[
+                {
+                  minHeight: 48,
+                  px: 2.5,
+                },
+                open
+                  ? {
+                      justifyContent: 'initial',
+                    }
+                  : {
+                      justifyContent: 'center',
+                    },
+              ]}
+            >
+              <ListItemIcon
+                sx={[
+                  {
+                    minWidth: 0,
+                    justifyContent: 'center',
+                  },
+                  open
+                    ? {
+                        mr: 3,
+                      }
+                    : {
+                        mr: 'auto',
+                      },
+                ]}
+              >
+                {item.icon && (
+                  <InvenTreeIcon icon={item.icon} iconProps={{ size: 20 }} />
+                )}
+              </ListItemIcon>
+              <ListItemText
+                primary={typeof item.title === 'string' ? item.title : item.title}
+                sx={[
+                  open
+                    ? {
+                        opacity: 1,
+                      }
+                    : {
+                        opacity: 0,
+                      },
+                ]}
+              />
+            </ListItemButton>
+          </ListItem>
+        ))}
+      </List>
+      <Divider />
+      <List>
+        <ListItem disablePadding>
+          <ListItemText
+            primary={t`Settings`}
+            sx={[
+              {
+                px: 2.5,
+                py: 1,
+                fontWeight: 600,
+                fontSize: '0.75rem',
+                textTransform: 'uppercase',
+              },
+              open
+                ? {
+                    opacity: 1,
+                  }
+                : {
+                    opacity: 0,
+                  },
+            ]}
           />
-          <MenuLinks
-            title={t`Actions`}
-            links={menuItemsAction}
-            beforeClick={closeFunc}
-          />
-          <Space h='md' />
-          {plugins.length > 0 ? (
-            <MenuLinks
-              title={t`Plugins`}
-              links={plugins}
-              beforeClick={closeFunc}
-            />
-          ) : (
-            <></>
-          )}
-        </ScrollArea>
-      </Container>
-      <div ref={ref}>
-        <Space h='md' />
-        <MenuLinks
-          title={t`Documentation`}
-          links={menuItemsDocumentation}
-          beforeClick={closeFunc}
-        />
-        <Space h='md' />
-        <MenuLinks
-          title={t`About`}
-          links={menuItemsAbout}
-          beforeClick={closeFunc}
-        />
-      </div>
-    </Flex>
+        </ListItem>
+        {visibleSettingsItems.map((item) => (
+          <ListItem key={item.id} disablePadding sx={{ display: 'block' }}>
+            <ListItemButton
+              onClick={() => handleItemClick(item)}
+              sx={[
+                {
+                  minHeight: 48,
+                  px: 2.5,
+                },
+                open
+                  ? {
+                      justifyContent: 'initial',
+                    }
+                  : {
+                      justifyContent: 'center',
+                    },
+              ]}
+            >
+              <ListItemIcon
+                sx={[
+                  {
+                    minWidth: 0,
+                    justifyContent: 'center',
+                  },
+                  open
+                    ? {
+                        mr: 3,
+                      }
+                    : {
+                        mr: 'auto',
+                      },
+                ]}
+              >
+                {item.icon && (
+                  <InvenTreeIcon icon={item.icon} iconProps={{ size: 20 }} />
+                )}
+              </ListItemIcon>
+              <ListItemText
+                primary={typeof item.title === 'string' ? item.title : item.title}
+                sx={[
+                  open
+                    ? {
+                        opacity: 1,
+                      }
+                    : {
+                        opacity: 0,
+                      },
+                ]}
+              />
+            </ListItemButton>
+          </ListItem>
+        ))}
+      </List>
+    </Box>
   );
 }

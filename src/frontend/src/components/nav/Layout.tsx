@@ -4,6 +4,7 @@ import { Spotlight, createSpotlight } from '@mantine/spotlight';
 import { IconSearch } from '@tabler/icons-react';
 import { type JSX, useEffect, useState } from 'react';
 import { Navigate, Outlet, useLocation, useNavigate } from 'react-router-dom';
+import { Box } from '@mui/material';
 
 import { getActions } from '../../defaults/actions';
 import * as classes from '../../main.css';
@@ -12,6 +13,7 @@ import { useUserState } from '../../states/UserState';
 import { Boundary } from '../Boundary';
 import { Footer } from './Footer';
 import { Header } from './Header';
+import { NavigationDrawer } from './NavigationDrawer';
 
 export const ProtectedRoute = ({ children }: { children: JSX.Element }) => {
   const location = useLocation();
@@ -60,16 +62,30 @@ export default function LayoutComponent() {
 
   return (
     <ProtectedRoute>
-      <Flex direction='column' mih='100vh'>
-        <Header />
-        <Container className={classes.layoutContent} size='100%'>
-          <Boundary label={'layout'}>
-            <Outlet />
-          </Boundary>
-          {/* </ErrorBoundary> */}
-        </Container>
-        <Space h='xl' />
-        <Footer />
+      <Box sx={{ display: 'flex', minHeight: '100vh' }}>
+        {/* <CssBaseline /> */}
+        <NavigationDrawer opened={true} close={() => {}} />
+        <Box
+          component="main"
+          sx={{
+            flexGrow: 1,
+            display: 'flex',
+            flexDirection: 'column',
+            minHeight: '100vh',
+            width: '100%',
+          }}
+        >
+          <Header />
+          <Box sx={{ flexGrow: 1 }}>
+            <Container className={classes.layoutContent} size='100%'>
+              <Boundary label={'layout'}>
+                <Outlet />
+              </Boundary>
+            </Container>
+          </Box>
+          <Space h='xl' />
+          <Footer />
+        </Box>
         {userSettings.isSet('SHOW_SPOTLIGHT') && (
           <Spotlight
             actions={actions}
@@ -83,7 +99,7 @@ export default function LayoutComponent() {
             nothingFound={t`Nothing found...`}
           />
         )}
-      </Flex>
+      </Box>
     </ProtectedRoute>
   );
 }

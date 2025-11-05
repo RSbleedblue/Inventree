@@ -198,19 +198,98 @@ export default function DashboardLayout() {
     [loaded, widgets, availableWidgets.loaded]
   );
 
+  // Helper function to get default widget labels for new users
+  const getDefaultWidgetLabels = useCallback((items: DashboardWidgetProps[]): string[] => {
+    const labels: string[] = [];
+    
+    // Prioritize analytics widgets
+    if (items.find((w) => w.label === 'stock-analytics')) labels.push('stock-analytics');
+    if (items.find((w) => w.label === 'orders-analytics')) labels.push('orders-analytics');
+    if (items.find((w) => w.label === 'parts-chart')) labels.push('parts-chart');
+    
+    // Add some key statistics
+    if (items.find((w) => w.label === 'low-stk')) labels.push('low-stk');
+    if (items.find((w) => w.label === 'act-bo')) labels.push('act-bo');
+    if (items.find((w) => w.label === 'act-so')) labels.push('act-so');
+    if (items.find((w) => w.label === 'act-po')) labels.push('act-po');
+    
+    // Fallback to getting started if available
+    if (labels.length === 0 && items.find((w) => w.label === 'gstart')) {
+      labels.push('gstart');
+    }
+    
+    return labels;
+  }, []);
+
+  // Helper function to generate default layouts
+  const getDefaultLayouts = useCallback((widgetLabels: string[], items: DashboardWidgetProps[]): any => {
+    const layouts: Layout[] = [];
+    let x = 0;
+    let y = 0;
+    const maxWidth = 12;
+
+    widgetLabels.forEach((label, index) => {
+      const widget = items.find((w) => w.label === label);
+      if (!widget) return;
+
+      let w = widget.minWidth || 4;
+      let h = widget.minHeight || 3;
+
+      // Check if widget would overflow
+      if (x + w > maxWidth) {
+        x = 0;
+        y += Math.max(...layouts.filter((l) => l.x === x).map((l) => l.y + (l.h || 3)) || [0]);
+      }
+
+      layouts.push({
+        w,
+        h,
+        x,
+        y,
+        i: label,
+        minW: widget.minWidth || 1,
+        minH: widget.minHeight || 1,
+        moved: false,
+        static: false
+      });
+
+      x += w;
+      if (x >= maxWidth) {
+        x = 0;
+        y += h;
+      }
+    });
+
+    return { lg: layouts };
+  }, []);
+
   // Load the dashboard layout from local storage
   useEffect(() => {
     if (availableWidgets.loaded) {
-      setLayouts(remoteLayouts);
-      setWidgets(
-        availableWidgets.items.filter((widget) =>
-          remoteWidgets.includes(widget.label)
-        )
-      );
+      // If no widgets are saved, use default widgets for new users
+      const hasCustomWidgets = remoteWidgets && remoteWidgets.length > 0;
+      
+      if (hasCustomWidgets) {
+        setLayouts(remoteLayouts);
+        setWidgets(
+          availableWidgets.items.filter((widget) =>
+            remoteWidgets.includes(widget.label)
+          )
+        );
+      } else {
+        // New user - show default analytics dashboard
+        const defaultWidgetLabels = getDefaultWidgetLabels(availableWidgets.items);
+        setLayouts(getDefaultLayouts(defaultWidgetLabels, availableWidgets.items));
+        setWidgets(
+          availableWidgets.items.filter((widget) =>
+            defaultWidgetLabels.includes(widget.label)
+          )
+        );
+      }
 
       setLoaded(true);
     }
-  }, [availableWidgets.loaded]);
+  }, [availableWidgets.loaded, getDefaultWidgetLabels, getDefaultLayouts]);
 
   // Clear all widgets from the dashboard
   const clearWidgets = useCallback(() => {
@@ -221,40 +300,6 @@ export default function DashboardLayout() {
     setLayouts({});
   }, []);
 
-  const defaultLayouts = {
-    lg: [
-      {
-        w: 6,
-        h: 4,
-        x: 0,
-        y: 0,
-        i: 'gstart',
-        minW: 5,
-        minH: 4,
-        moved: false,
-        static: false
-      },
-      {
-        w: 6,
-        h: 4,
-        x: 6,
-        y: 0,
-        i: 'news',
-        minW: 5,
-        minH: 4,
-        moved: false,
-        static: false
-      }
-    ]
-  };
-  const loadWigs = ['news', 'gstart'];
-  const defaultWidgets = useMemo(() => {
-    return loadWigs
-      .map((lwid: string) =>
-        availableWidgets.items.find((wid) => wid.label === lwid)
-      )
-      .filter((widget): widget is DashboardWidgetProps => widget !== undefined);
-  }, [availableWidgets.items, defaultLayouts]);
 
   return (
     <>
@@ -285,32 +330,17 @@ export default function DashboardLayout() {
       {layouts && loaded && availableWidgets.loaded ? (
         <>
           {widgetLabels.length == 0 ? (
-            <>
-              <Center>
-                <Card shadow='xs' padding='xl' style={{ width: '100%' }}>
-                  <Alert
-                    color='blue'
-                    title={t`No Widgets Selected`}
-                    icon={<IconInfoCircle />}
-                  >
-                    <Text>{t`Use the menu to add widgets to the dashboard`}</Text>
-                  </Alert>
-                </Card>
-              </Center>
-              {showSampleDashboard && (
-                <>
-                  <Space h='lg' />
-                  {WidgetGrid(
-                    defaultLayouts,
-                    () => {},
-                    editing,
-                    defaultWidgets,
-                    removing,
-                    () => {}
-                  )}
-                </>
-              )}
-            </>
+            <Center>
+              <Card shadow='xs' padding='xl' style={{ width: '100%' }}>
+                <Alert
+                  color='blue'
+                  title={t`No Widgets Selected`}
+                  icon={<IconInfoCircle />}
+                >
+                  <Text>{t`Use the menu to add widgets to the dashboard`}</Text>
+                </Alert>
+              </Card>
+            </Center>
           ) : (
             WidgetGrid(
               layouts,

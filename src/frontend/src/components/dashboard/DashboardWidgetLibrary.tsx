@@ -9,6 +9,8 @@ import GetStartedWidget from './widgets/GetStartedWidget';
 import LanguageSelectDashboardWidget from './widgets/LanguageSelectWidget';
 import NewsWidget from './widgets/NewsWidget';
 import QueryCountDashboardWidget from './widgets/QueryCountDashboardWidget';
+import AnalyticsWidget from './widgets/AnalyticsWidget';
+import ChartWidget from './widgets/ChartWidget';
 
 /**
  *
@@ -204,14 +206,143 @@ export function BuiltinSettingsWidgets(): DashboardWidgetProps[] {
   return [ColorToggleDashboardWidget(), LanguageSelectDashboardWidget()];
 }
 
+export function BuiltinAnalyticsWidgets(): DashboardWidgetProps[] {
+  const user = useUserState.getState();
+
+  const widgets: DashboardWidgetProps[] = [];
+
+  // Stock Analytics Widget
+  if (user.hasViewPermission(ModelType.stockitem)) {
+    widgets.push({
+      label: 'stock-analytics',
+      title: t`Stock Overview`,
+      description: t`Overview of stock items and status`,
+      minWidth: 4,
+      minHeight: 3,
+      modelType: ModelType.stockitem,
+      render: () => (
+        <AnalyticsWidget
+          title={t`Stock Overview`}
+          items={[
+            {
+              label: t`Total Stock Items`,
+              modelType: ModelType.stockitem,
+              icon: 'stock'
+            },
+            {
+              label: t`Low Stock`,
+              modelType: ModelType.part,
+              params: { active: true, low_stock: true, virtual: false },
+              icon: 'stock'
+            },
+            {
+              label: t`Expired Items`,
+              modelType: ModelType.stockitem,
+              params: { expired: true },
+              icon: 'stock'
+            }
+          ]}
+        />
+      )
+    });
+  }
+
+  // Orders Analytics Widget
+  if (
+    user.hasViewPermission(ModelType.build) ||
+    user.hasViewPermission(ModelType.salesorder) ||
+    user.hasViewPermission(ModelType.purchaseorder)
+  ) {
+    const orderItems: Array<{
+      label: string;
+      modelType: ModelType;
+      params?: any;
+      icon?: string;
+    }> = [];
+    if (user.hasViewPermission(ModelType.build)) {
+      orderItems.push({
+        label: t`Active Build Orders`,
+        modelType: ModelType.build,
+        params: { outstanding: true },
+        icon: 'manufacturing'
+      });
+    }
+    if (user.hasViewPermission(ModelType.salesorder)) {
+      orderItems.push({
+        label: t`Active Sales Orders`,
+        modelType: ModelType.salesorder,
+        params: { outstanding: true },
+        icon: 'sales_order'
+      });
+    }
+    if (user.hasViewPermission(ModelType.purchaseorder)) {
+      orderItems.push({
+        label: t`Active Purchase Orders`,
+        modelType: ModelType.purchaseorder,
+        params: { outstanding: true },
+        icon: 'purchase_order'
+      });
+    }
+
+    if (orderItems.length > 0) {
+      widgets.push({
+        label: 'orders-analytics',
+        title: t`Orders Overview`,
+        description: t`Overview of active orders`,
+        minWidth: 4,
+        minHeight: 3,
+        render: () => (
+          <AnalyticsWidget
+            title={t`Orders Overview`}
+            items={orderItems}
+          />
+        )
+      });
+    }
+  }
+
+  // Parts Chart Widget
+  if (user.hasViewPermission(ModelType.part)) {
+    widgets.push({
+      label: 'parts-chart',
+      title: t`Parts Activity`,
+      description: t`Chart showing parts activity`,
+      minWidth: 6,
+      minHeight: 4,
+      modelType: ModelType.part,
+      render: () => (
+        <ChartWidget
+          title={t`Parts Activity`}
+          modelType={ModelType.part}
+          params={{ active: true }}
+          chartType="line"
+        />
+      )
+    });
+  }
+
+  // Shortcuts Widget
+  // widgets.push({
+  //   label: 'shortcuts',
+  //   title: t`Quick Actions`,
+  //   description: t`Quick navigation shortcuts`,
+  //   minWidth: 4,
+  //   minHeight: 3,
+  //   render: () => <ShortcutsWidget />
+  // });
+
+  return widgets;
+}
+
 /**
  *
  * @returns A list of built-in dashboard widgets
  */
 export default function DashboardWidgetLibrary(): DashboardWidgetProps[] {
   return [
-    // ...BuiltinQueryCountWidgets(),
-    // ...BuiltinGettingStartedWidgets(),
-    // ...BuiltinSettingsWidgets()
+    ...BuiltinQueryCountWidgets(),
+    ...BuiltinGettingStartedWidgets(),
+    ...BuiltinAnalyticsWidgets(),
+    ...BuiltinSettingsWidgets()
   ];
 }

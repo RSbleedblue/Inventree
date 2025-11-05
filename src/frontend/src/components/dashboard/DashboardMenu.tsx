@@ -1,26 +1,29 @@
-import { t } from '@lingui/core/macro';
-import { Trans } from '@lingui/react/macro';
+import { t } from "@lingui/core/macro";
+import { Trans } from "@lingui/react/macro";
 import {
   ActionIcon,
   Group,
   Indicator,
   Menu,
   Paper,
-  Tooltip
-} from '@mantine/core';
+  Tooltip,
+  Text,
+  getThemeColor,
+  useMantineTheme,
+} from "@mantine/core";
 import {
   IconCircleCheck,
   IconDotsVertical,
   IconLayout2,
   IconLayoutGridAdd,
-  IconLayoutGridRemove
-} from '@tabler/icons-react';
-import { useMemo } from 'react';
+  IconLayoutGridRemove,
+} from "@tabler/icons-react";
+import { useMemo } from "react";
 
-import useInstanceName from '../../hooks/UseInstanceName';
-import { useUserState } from '../../states/UserState';
-import { StylishText } from '../items/StylishText';
-import { INVEX_INSTANCE_NAME } from '../../constants/constants';
+import useInstanceName from "../../hooks/UseInstanceName";
+import { useUserState } from "../../states/UserState";
+import { StylishText } from "../items/StylishText";
+import { INVEX_INSTANCE_NAME } from "../../constants/constants";
 
 /**
  * A menu for editing the dashboard layout
@@ -32,7 +35,7 @@ export default function DashboardMenu({
   onStartEdit,
   onStartRemove,
   onClear,
-  onAcceptLayout
+  onAcceptLayout,
 }: Readonly<{
   editing: boolean;
   removing: boolean;
@@ -45,46 +48,60 @@ export default function DashboardMenu({
   const user = useUserState();
   const instanceName = useInstanceName();
 
+  const theme = useMantineTheme();
+  const primaryColor = getThemeColor(theme.primaryColor, theme);
+
   const title = useMemo(() => {
     const username = user.username();
 
     return (
-      <StylishText size='lg'>{`${INVEX_INSTANCE_NAME} - ${username}`}</StylishText>
+      <div className="flex flex-col items-start">
+        <Text size="xl">
+          Hello,{' '}
+          <Text
+            component="span"
+            fw={700}
+            style={{ color: primaryColor }}
+          >
+            {username.toUpperCase()}
+          </Text>
+        </Text>
+      </div>
     );
-  }, [user, instanceName]);
+  }, [user, instanceName, primaryColor]);
 
   return (
-    <Paper p='sm' pr={0}>
-      <Group justify='space-between' wrap='nowrap'>
+    <Paper p="sm" pr={0}>
+      <Group justify="space-between" wrap="nowrap">
         {title}
 
-        <Group justify='right' wrap='nowrap'>
+        <Group justify="right" wrap="nowrap">
           {(editing || removing) && (
             <Tooltip label={t`Accept Layout`} onClick={onAcceptLayout}>
               <ActionIcon
-                aria-label={'dashboard-accept-layout'}
-                color='green'
-                variant='transparent'
+                aria-label={"dashboard-accept-layout"}
+                color="green"
+                variant="transparent"
               >
                 <IconCircleCheck />
               </ActionIcon>
             </Tooltip>
           )}
           <Menu
-            shadow='md'
+            shadow="md"
             width={200}
             openDelay={100}
             closeDelay={400}
-            position='bottom-end'
+            position="bottom-end"
           >
             <Menu.Target>
               <Indicator
-                color='red'
-                position='bottom-center'
+                color="red"
+                position="bottom-center"
                 processing
                 disabled={!editing}
               >
-                <ActionIcon variant='transparent' aria-label='dashboard-menu'>
+                <ActionIcon variant="transparent" aria-label="dashboard-menu">
                   <IconDotsVertical />
                 </ActionIcon>
               </Indicator>
@@ -97,7 +114,7 @@ export default function DashboardMenu({
 
               {!editing && !removing && (
                 <Menu.Item
-                  leftSection={<IconLayout2 color='blue' size={14} />}
+                  leftSection={<IconLayout2 color="blue" size={14} />}
                   onClick={onStartEdit}
                 >
                   <Trans>Edit Layout</Trans>
@@ -106,7 +123,7 @@ export default function DashboardMenu({
 
               {!editing && !removing && (
                 <Menu.Item
-                  leftSection={<IconLayoutGridAdd color='green' size={14} />}
+                  leftSection={<IconLayoutGridAdd color="green" size={14} />}
                   onClick={onAddWidget}
                 >
                   <Trans>Add Widget</Trans>
@@ -115,7 +132,7 @@ export default function DashboardMenu({
 
               {!editing && !removing && (
                 <Menu.Item
-                  leftSection={<IconLayoutGridRemove color='red' size={14} />}
+                  leftSection={<IconLayoutGridRemove color="red" size={14} />}
                   onClick={onStartRemove}
                 >
                   <Trans>Remove Widgets</Trans>
@@ -124,7 +141,7 @@ export default function DashboardMenu({
 
               {!editing && !removing && (
                 <Menu.Item
-                  leftSection={<IconLayoutGridRemove color='red' size={14} />}
+                  leftSection={<IconLayoutGridRemove color="red" size={14} />}
                   onClick={onClear}
                 >
                   <Trans>Clear Widgets</Trans>
@@ -133,7 +150,7 @@ export default function DashboardMenu({
 
               {(editing || removing) && (
                 <Menu.Item
-                  leftSection={<IconCircleCheck color='green' size={14} />}
+                  leftSection={<IconCircleCheck color="green" size={14} />}
                   onClick={onAcceptLayout}
                 >
                   <Trans>Accept Layout</Trans>

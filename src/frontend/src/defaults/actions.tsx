@@ -26,33 +26,33 @@ export function getActions(navigate: NavigateFunction) {
     {
       id: 'dashboard',
       label: t`Dashboard`,
-      description: t`Go to the InvenTree dashboard`,
+      description: t`Go to the Invex dashboard`,
       onClick: () => navigate('/'),
       leftSection: <IconLink size='1.2rem' />
     },
     {
       id: 'documentation',
       label: t`Documentation`,
-      description: t`Visit the documentation to learn more about InvenTree`,
+      description: t`Visit the documentation to learn more about Invex`,
       onClick: () => {
-        window.location.href = docLinks.faq;
+        window.location.href = docLinks.app;
       },
       leftSection: <IconLink size='1.2rem' />
     },
-    {
-      id: 'about',
-      label: t`About InvenTree`,
-      description: t`About the InvenTree org`,
-      onClick: () => aboutInvenTree(),
-      leftSection: <IconLink size='1.2rem' />
-    },
-    {
-      id: 'server-info',
-      label: t`Server Information`,
-      description: t`About this InvenTree instance`,
-      onClick: () => serverInfo(),
-      leftSection: <IconLink size='1.2rem' />
-    },
+    // {
+    //   id: 'about',
+    //   label: t`About InvenTree`,
+    //   description: t`About the InvenTree org`,
+    //   onClick: () => aboutInvenTree(),
+    //   leftSection: <IconLink size='1.2rem' />
+    // },
+    // {
+    //   id: 'server-info',
+    //   label: t`Server Information`,
+    //   description: t`About this InvenTree instance`,
+    //   onClick: () => serverInfo(),
+    //   leftSection: <IconLink size='1.2rem' />
+    // },
     {
       id: 'license-info',
       label: t`License Information`,
