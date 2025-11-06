@@ -101,18 +101,18 @@ export default function UserSettings() {
           />
         )
       },
-      {
-        name: 'notifications',
-        label: t`Notifications`,
-        icon: <IconBellCog />,
-        content: (
-          <PluginSettingsGroup
-            mixin='notification'
-            global={false}
-            message={t`The settings below are specific to each available notification method`}
-          />
-        )
-      },
+      // {
+      //   name: 'notifications',
+      //   label: t`Notifications`,
+      //   icon: <IconBellCog />,
+      //   content: (
+      //     <PluginSettingsGroup
+      //       mixin='notification'
+      //       global={false}
+      //       message={t`The settings below are specific to each available notification method`}
+      //     />
+      //   )
+      // },
       {
         name: 'reporting',
         label: t`Reporting`,
@@ -123,12 +123,12 @@ export default function UserSettings() {
           />
         )
       },
-      {
-        name: 'plugins',
-        label: t`Plugin Settings`,
-        icon: <IconPlugConnected />,
-        content: <PluginSettingsGroup global={false} />
-      }
+      // {
+      //   name: 'plugins',
+      //   label: t`Plugin Settings`,
+      //   icon: <IconPlugConnected />,
+      //   content: <PluginSettingsGroup global={false} />
+      // }
     ];
   }, []);
 

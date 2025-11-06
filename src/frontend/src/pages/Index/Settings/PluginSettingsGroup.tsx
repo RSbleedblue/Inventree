@@ -100,17 +100,23 @@ export default function PluginSettingsGroup({
         </Text>
       </Alert>
       <Accordion multiple>
-        {activePlugins.instance?.map((plugin: any) => {
-          return (
-            <PluginSettingGroupItem
-              global={global}
-              key={plugin.key}
-              pluginKey={plugin.key}
-              pluginName={plugin.meta?.human_name ?? plugin.name}
-              pluginDescription={plugin?.meta?.description}
-            />
-          );
-        })}
+        {activePlugins.instance
+          ?.filter(
+            (plugin: any) =>
+              plugin.key !== 'inventreebarcode' &&
+              plugin.key !== 'inventreecurrencyexchange'
+          )
+          .map((plugin: any) => {
+            return (
+              <PluginSettingGroupItem
+                global={global}
+                key={plugin.key}
+                pluginKey={plugin.key}
+                pluginName={plugin.meta?.human_name ?? plugin.name}
+                pluginDescription={plugin?.meta?.description}
+              />
+            );
+          })}
       </Accordion>
     </Stack>
   );

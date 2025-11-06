@@ -51,8 +51,8 @@ export default function SystemSettings() {
               'INVENTREE_COMPANY_NAME',
               'INVENTREE_INSTANCE_ID',
               'INVENTREE_ANNOUNCE_ID',
-              'INVENTREE_INSTANCE',
-              'INVENTREE_INSTANCE_TITLE',
+              // 'INVENTREE_INSTANCE',
+              // 'INVENTREE_INSTANCE_TITLE',
               'INVENTREE_RESTRICT_ABOUT',
               'DISPLAY_FULL_NAMES',
               'DISPLAY_PROFILE_INFO',
@@ -109,7 +109,7 @@ export default function SystemSettings() {
               'BARCODE_INPUT_DELAY',
               'BARCODE_WEBCAM_SUPPORT',
               'BARCODE_SHOW_TEXT',
-              'BARCODE_GENERATION_PLUGIN',
+              // 'BARCODE_GENERATION_PLUGIN',
               'BARCODE_STORE_RESULTS',
               'BARCODE_RESULTS_MAX_NUM'
             ]}
@@ -159,7 +159,10 @@ export default function SystemSettings() {
             />
             <br />
             <GlobalSettingList
-              keys={['CURRENCY_UPDATE_PLUGIN', 'CURRENCY_UPDATE_INTERVAL']}
+              keys={[
+                // 'CURRENCY_UPDATE_PLUGIN',
+                'CURRENCY_UPDATE_INTERVAL'
+              ]}
             />
           </>
         )
@@ -325,12 +328,12 @@ export default function SystemSettings() {
           />
         )
       },
-      {
-        name: 'plugins',
-        label: t`Plugin Settings`,
-        icon: <IconPlugConnected />,
-        content: <PluginSettingsGroup global={true} />
-      }
+      // {
+      //   name: 'plugins',
+      //   label: t`Plugin Settings`,
+      //   icon: <IconPlugConnected />,
+      //   content: <PluginSettingsGroup global={true} />
+      // }
     ];
   }, []);
 

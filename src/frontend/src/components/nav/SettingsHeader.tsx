@@ -32,7 +32,7 @@ export function SettingsHeader({
           <StylishText size='xl'>{title}</StylishText>
           {shorthand && <Text c='dimmed'>({shorthand})</Text>}
         </Group>
-        <Group>{subtitle ? <Text c='dimmed'>{subtitle}</Text> : null}</Group>
+        {/* <Group>{subtitle ? <Text c='dimmed'>{subtitle}</Text> : null}</Group> */}
       </Stack>
       {user.isStaff() && (
         <SegmentedControl
