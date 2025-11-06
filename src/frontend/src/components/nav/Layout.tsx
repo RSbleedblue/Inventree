@@ -1,5 +1,5 @@
 import { t } from "@lingui/core/macro";
-import { Container, Flex, Space } from "@mantine/core";
+import { Container, Flex, Space, useMantineColorScheme } from "@mantine/core";
 import { Spotlight, createSpotlight } from "@mantine/spotlight";
 import { IconSearch } from "@tabler/icons-react";
 import { type JSX, useEffect, useState } from "react";
@@ -41,6 +41,10 @@ export default function LayoutComponent() {
   const navigate = useNavigate();
   const location = useLocation();
   const userSettings = useUserSettingsState();
+  const { colorScheme } = useMantineColorScheme();
+
+  // Set opacity based on theme: dark = 0.02, light = 0.5
+  const backgroundOpacity = colorScheme === 'dark' ? 0.02 : 0.5;
 
   const defaultActions = getActions(navigate);
   const [actions, setActions] = useState(defaultActions);
@@ -63,10 +67,25 @@ export default function LayoutComponent() {
   return (
     <ProtectedRoute>
       <Box
-        sx={{ display: "flex", minHeight: "100vh" }}
-        style={{
-          background:
-            "url('https://www.zoho.com/inventory/inventory-software-demo/assets/images/svgs/home-header-bg-zom-f063611a9d.svg')",
+        sx={{
+          display: "flex",
+          minHeight: "100vh",
+          position: "relative",
+          "&::before": {
+            content: '""',
+            position: "absolute",
+            top: 0,
+            left: 0,
+            right: 0,
+            bottom: 0,
+            backgroundImage:
+              "url('https://www.zoho.com/inventory/inventory-software-demo/assets/images/svgs/home-header-bg-zom-f063611a9d.svg')",
+            backgroundSize: "cover",
+            backgroundPosition: "center",
+            backgroundRepeat: "no-repeat",
+            opacity: backgroundOpacity,
+            zIndex: 0,
+          },
         }}
       >
         {/* <CssBaseline /> */}
@@ -79,6 +98,8 @@ export default function LayoutComponent() {
             flexDirection: "column",
             minHeight: "100vh",
             width: "100%",
+            position: "relative",
+            zIndex: 1,
           }}
         >
           <Header />
