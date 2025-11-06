@@ -1,18 +1,18 @@
-import { t } from '@lingui/core/macro';
-import type { SpotlightActionData } from '@mantine/spotlight';
-import { IconBarcode, IconLink, IconPointer } from '@tabler/icons-react';
-import type { NavigateFunction } from 'react-router-dom';
+import { t } from "@lingui/core/macro";
+import type { SpotlightActionData } from "@mantine/spotlight";
+import { IconBarcode, IconLink, IconPointer } from "@tabler/icons-react";
+import type { NavigateFunction } from "react-router-dom";
 
-import { openContextModal } from '@mantine/modals';
-import { useShallow } from 'zustand/react/shallow';
-import { useLocalState } from '../states/LocalState';
-import { useUserState } from '../states/UserState';
-import { aboutInvenTree, docLinks, licenseInfo, serverInfo } from './links';
+import { openContextModal } from "@mantine/modals";
+import { useShallow } from "zustand/react/shallow";
+import { useLocalState } from "../states/LocalState";
+import { useUserState } from "../states/UserState";
+import { aboutInvenTree, docLinks, licenseInfo, serverInfo } from "./links";
 
 export function openQrModal(navigate: NavigateFunction) {
   return openContextModal({
-    modal: 'qr',
-    innerProps: { navigate: navigate }
+    modal: "qr",
+    innerProps: { navigate: navigate },
   });
 }
 
@@ -24,20 +24,20 @@ export function getActions(navigate: NavigateFunction) {
 
   const actions: SpotlightActionData[] = [
     {
-      id: 'dashboard',
+      id: "dashboard",
       label: t`Dashboard`,
       description: t`Go to the Invex dashboard`,
-      onClick: () => navigate('/'),
-      leftSection: <IconLink size='1.2rem' />
+      onClick: () => navigate("/"),
+      leftSection: <IconLink size="1.2rem" />,
     },
     {
-      id: 'documentation',
+      id: "documentation",
       label: t`Documentation`,
       description: t`Visit the documentation to learn more about Invex`,
       onClick: () => {
         window.location.href = docLinks.app;
       },
-      leftSection: <IconLink size='1.2rem' />
+      leftSection: <IconLink size="1.2rem" />,
     },
     // {
     //   id: 'about',
@@ -54,36 +54,45 @@ export function getActions(navigate: NavigateFunction) {
     //   leftSection: <IconLink size='1.2rem' />
     // },
     {
-      id: 'license-info',
+      id: "license-info",
       label: t`License Information`,
       description: t`Licenses for dependencies of the service`,
       onClick: () => licenseInfo(),
-      leftSection: <IconLink size='1.2rem' />
+      leftSection: <IconLink size="1.2rem" />,
     },
     {
-      id: 'navigation',
+      id: "navigation",
       label: t`Open Navigation`,
       description: t`Open the main navigation menu`,
       onClick: () => setNavigationOpen(true),
-      leftSection: <IconPointer size='1.2rem' />
+      leftSection: <IconPointer size="1.2rem" />,
     },
     {
-      id: 'scan',
+      id: "scan",
       label: t`Scan`,
       description: t`Scan a barcode or QR code`,
       onClick: () => openQrModal(navigate),
-      leftSection: <IconBarcode size='1.2rem' />
-    }
+      leftSection: <IconBarcode size="1.2rem" />,
+    },
+    {
+      id: "help and support",
+      label: t`Help and Support`,
+      description: t`Get help and support from the Invex team`,
+      onClick: () => {
+        window.location.href = "https://synthlane.com/contact";
+      },
+      leftSection: <IconLink size="1.2rem" />,
+    },
   ];
 
   // Staff actions
   user?.is_staff &&
     actions.push({
-      id: 'admin-center',
+      id: "admin-center",
       label: t`Admin Center`,
       description: t`Go to the Admin Center`,
       onClick: () => {}, /// navigate(menuItems['settings-admin'].link),}
-      leftSection: <IconLink size='1.2rem' />
+      leftSection: <IconLink size="1.2rem" />,
     });
 
   return actions;

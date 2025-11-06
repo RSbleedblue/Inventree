@@ -120,7 +120,7 @@ export default function NewsWidget() {
 
   return (
     <Stack>
-      <StylishText size='xl'>{t`News Updates`}</StylishText>
+      <StylishText size='xl'>{t`News Update`}</StylishText>
       <ScrollArea h={400}>
         <Container>
           <Table>

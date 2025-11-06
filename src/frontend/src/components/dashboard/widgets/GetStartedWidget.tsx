@@ -12,8 +12,8 @@ export default function GetStartedWidget() {
 
   return (
     <Stack>
-      <StylishText size='xl'>{t`Getting Started`}</StylishText>
-      <GettingStartedCarousel items={docLinks} />
+      {/* <StylishText size='xl'>{t`Getting Started`}</StylishText>
+      <GettingStartedCarousel items={docLinks} /> */}
     </Stack>
   );
 }

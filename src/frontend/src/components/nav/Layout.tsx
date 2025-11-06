@@ -1,19 +1,19 @@
-import { t } from '@lingui/core/macro';
-import { Container, Flex, Space } from '@mantine/core';
-import { Spotlight, createSpotlight } from '@mantine/spotlight';
-import { IconSearch } from '@tabler/icons-react';
-import { type JSX, useEffect, useState } from 'react';
-import { Navigate, Outlet, useLocation, useNavigate } from 'react-router-dom';
-import { Box } from '@mui/material';
+import { t } from "@lingui/core/macro";
+import { Container, Flex, Space } from "@mantine/core";
+import { Spotlight, createSpotlight } from "@mantine/spotlight";
+import { IconSearch } from "@tabler/icons-react";
+import { type JSX, useEffect, useState } from "react";
+import { Navigate, Outlet, useLocation, useNavigate } from "react-router-dom";
+import { Box } from "@mui/material";
 
-import { getActions } from '../../defaults/actions';
-import * as classes from '../../main.css';
-import { useUserSettingsState } from '../../states/SettingsStates';
-import { useUserState } from '../../states/UserState';
-import { Boundary } from '../Boundary';
-import { Footer } from './Footer';
-import { Header } from './Header';
-import { NavigationDrawer } from './NavigationDrawer';
+import { getActions } from "../../defaults/actions";
+import * as classes from "../../main.css";
+import { useUserSettingsState } from "../../states/SettingsStates";
+import { useUserState } from "../../states/UserState";
+import { Boundary } from "../Boundary";
+import { Footer } from "./Footer";
+import { Header } from "./Header";
+import { NavigationDrawer } from "./NavigationDrawer";
 
 export const ProtectedRoute = ({ children }: { children: JSX.Element }) => {
   const location = useLocation();
@@ -22,11 +22,11 @@ export const ProtectedRoute = ({ children }: { children: JSX.Element }) => {
   if (!isLoggedIn()) {
     return (
       <Navigate
-        to='/logged-in'
+        to="/logged-in"
         state={{
           redirectUrl: location.pathname,
           queryParams: location.search,
-          anchor: location.hash
+          anchor: location.hash,
         }}
       />
     );
@@ -62,40 +62,46 @@ export default function LayoutComponent() {
 
   return (
     <ProtectedRoute>
-      <Box sx={{ display: 'flex', minHeight: '100vh' }}>
+      <Box
+        sx={{ display: "flex", minHeight: "100vh" }}
+        style={{
+          background:
+            "url('https://www.zoho.com/inventory/inventory-software-demo/assets/images/svgs/home-header-bg-zom-f063611a9d.svg')",
+        }}
+      >
         {/* <CssBaseline /> */}
         <NavigationDrawer opened={true} close={() => {}} />
         <Box
           component="main"
           sx={{
             flexGrow: 1,
-            display: 'flex',
-            flexDirection: 'column',
-            minHeight: '100vh',
-            width: '100%',
+            display: "flex",
+            flexDirection: "column",
+            minHeight: "100vh",
+            width: "100%",
           }}
         >
           <Header />
           <Box sx={{ flexGrow: 1 }}>
-            <Container className={classes.layoutContent} size='100%'>
-              <Boundary label={'layout'}>
+            <Container className={classes.layoutContent} size="100%">
+              <Boundary label={"layout"}>
                 <Outlet />
               </Boundary>
             </Container>
           </Box>
-          <Space h='xl' />
+          <Space h="xl" />
           <Footer />
         </Box>
-        {userSettings.isSet('SHOW_SPOTLIGHT') && (
+        {userSettings.isSet("SHOW_SPOTLIGHT") && (
           <Spotlight
             actions={actions}
             store={firstStore}
             highlightQuery
             searchProps={{
-              leftSection: <IconSearch size='1.2rem' />,
-              placeholder: t`Search...`
+              leftSection: <IconSearch size="1.2rem" />,
+              placeholder: t`Search...`,
             }}
-            shortcut={['mod + K']}
+            shortcut={["mod + K"]}
             nothingFound={t`Nothing found...`}
           />
         )}

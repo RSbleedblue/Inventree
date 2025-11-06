@@ -81,13 +81,13 @@ export const docLinks = {
 
 export function DocumentationLinks(): MenuLinkItem[] {
   return [
-    {
-      id: 'gettin-started',
-      title: t`Getting Started`,
-      link: docLinks.getting_started,
-      external: true,
-      description: t`Getting started with InvenTree`
-    },
+    // {
+    //   id: 'gettin-started',
+    //   title: t`Getting Started`,
+    //   link: docLinks.getting_started,
+    //   external: true,
+    //   description: t`Getting started with InvenTree`
+    // },
     {
       id: 'api',
       title: t`API`,

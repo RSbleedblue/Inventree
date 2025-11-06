@@ -1,6 +1,6 @@
-import { t } from '@lingui/core/macro';
-import DashboardLayout from '../../components/dashboard/DashboardLayout';
-import PageTitle from '../../components/nav/PageTitle';
+import { t } from "@lingui/core/macro";
+import DashboardLayout from "../../components/dashboard/DashboardLayout";
+import PageTitle from "../../components/nav/PageTitle";
 
 export default function Home() {
   return (
