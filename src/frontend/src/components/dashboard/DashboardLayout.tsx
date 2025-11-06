@@ -199,33 +199,32 @@ export default function DashboardLayout() {
   );
 
   // Helper function to get default widget labels for new users
-  const getDefaultWidgetLabels = useCallback(
-    (items: DashboardWidgetProps[]): string[] => {
-      const labels: string[] = [];
-
-      // Prioritize analytics widgets
-      if (items.find((w) => w.label === "stock-analytics"))
-        labels.push("stock-analytics");
-      if (items.find((w) => w.label === "orders-analytics"))
-        labels.push("orders-analytics");
-      if (items.find((w) => w.label === "parts-chart"))
-        labels.push("parts-chart");
-
-      // Add some key statistics
-      if (items.find((w) => w.label === "low-stk")) labels.push("low-stk");
-      if (items.find((w) => w.label === "act-bo")) labels.push("act-bo");
-      if (items.find((w) => w.label === "act-so")) labels.push("act-so");
-      if (items.find((w) => w.label === "act-po")) labels.push("act-po");
-
-      // Fallback to getting started if available
-      if (labels.length === 0 && items.find((w) => w.label === "gstart")) {
-        labels.push("gstart");
-      }
-
-      return labels;
-    },
-    []
-  );
+  const getDefaultWidgetLabels = useCallback((items: DashboardWidgetProps[]): string[] => {
+    const labels: string[] = [];
+    
+    // Prioritize filtered-orders-chart (interactive chart with filters)
+    if (items.find((w) => w.label === 'filtered-orders-chart')) labels.push('filtered-orders-chart');
+    
+    // Also include simple orders-chart
+    if (items.find((w) => w.label === 'orders-chart')) labels.push('orders-chart');
+    
+    // Prioritize analytics widgets
+    if (items.find((w) => w.label === 'stock-analytics')) labels.push('stock-analytics');
+    if (items.find((w) => w.label === 'orders-analytics')) labels.push('orders-analytics');
+    
+    // Add some key statistics
+    if (items.find((w) => w.label === 'low-stk')) labels.push('low-stk');
+    if (items.find((w) => w.label === 'act-bo')) labels.push('act-bo');
+    if (items.find((w) => w.label === 'act-so')) labels.push('act-so');
+    if (items.find((w) => w.label === 'act-po')) labels.push('act-po');
+    
+    // Fallback to getting started if available
+    if (labels.length === 0 && items.find((w) => w.label === 'gstart')) {
+      labels.push('gstart');
+    }
+    
+    return labels;
+  }, []);
 
   // Helper function to generate default layouts
   const getDefaultLayouts = useCallback(
