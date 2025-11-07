@@ -15,11 +15,11 @@ export default function PageTitle({
 
   const pageTitle = useMemo(() => {
     const instanceName = globalSettings.getSetting(
-      'INVENTREE_INSTANCE',
-      'InvenTree'
+      'INVEX_INSTANCE',
+      'Invex'
     );
     const useInstanceName = globalSettings.isSet(
-      'INVENTREE_INSTANCE_TITLE',
+      'INVEX_INSTANCE_TITLE',
       false
     );
 
